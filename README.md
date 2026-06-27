@@ -12,6 +12,22 @@ Modern, strictly-typed PHP **8.3+** SDK for the [CloudPayments](https://cloudpay
 
 > Why another library? Existing PHP packages are either abandoned (PHP 5.x-era thin array wrappers) or hardcode Guzzle, use userland enums, and miss receipts/payouts. This one is built on modern PHP with full coverage.
 
+## Documentation
+
+This README is a quick overview. Full usage guide lives in [`docs/`](docs/README.md):
+
+| Guide | |
+|---|---|
+| [Installation](docs/installation.md) | requirements, Composer, PSR-18 client |
+| [Configuration](docs/configuration.md) | credentials, gateways, custom HTTP client, idempotency |
+| [Payments](docs/payments.md) | charge, two-stage, tokens, 3-D Secure, refunds, lookups |
+| [Subscriptions](docs/subscriptions.md) | recurring billing |
+| [Receipts (54-FZ)](docs/receipts.md) | fiscal receipts |
+| [Payouts](docs/payouts.md) | sending money to a card |
+| [Webhooks](docs/webhooks.md) | signature verification + typed notifications |
+| [Error handling](docs/error-handling.md) | exception hierarchy, declines vs. failures |
+| [Enums reference](docs/enums.md) | every enum and its cases |
+
 ## Installation
 
 ```bash
