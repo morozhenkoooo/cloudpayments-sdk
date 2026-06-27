@@ -33,8 +33,10 @@ final readonly class Amount implements \Stringable
 
         $normalized = trim($value);
 
-        if (preg_match('/^\d+(\.\d+)?$/', $normalized) !== 1) {
-            throw new ValidationException(\sprintf('Invalid amount "%s": expected a non-negative decimal.', $value));
+        if (preg_match('/^\d+(\.\d{1,2})?$/', $normalized) !== 1) {
+            throw new ValidationException(
+                \sprintf('Invalid amount "%s": expected a non-negative decimal with at most 2 fraction digits.', $value),
+            );
         }
 
         return new self($normalized);

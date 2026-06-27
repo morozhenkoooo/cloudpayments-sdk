@@ -51,15 +51,15 @@ final readonly class RecurrentNotification implements \CloudPayments\Contract\No
             amount: Data::float($data, 'Amount'),
             currency: ($c = Data::string($data, 'Currency')) !== null ? Currency::tryFrom($c) : null,
             requireConfirmation: Data::bool($data, 'RequireConfirmation'),
-            startDate: Data::dateTime($data, 'StartDate'),
+            startDate: Data::dateTime($data, 'StartDateIso') ?? Data::dateTime($data, 'StartDate'),
             interval: Data::string($data, 'Interval'),
             period: Data::int($data, 'Period'),
             status: SubscriptionStatus::resolve(Data::string($data, 'Status'), Data::int($data, 'StatusCode')),
             successfulTransactionsNumber: Data::int($data, 'SuccessfulTransactionsNumber'),
             failedTransactionsNumber: Data::int($data, 'FailedTransactionsNumber'),
             maxPeriods: Data::int($data, 'MaxPeriods'),
-            lastTransactionDate: Data::dateTime($data, 'LastTransactionDate'),
-            nextTransactionDate: Data::dateTime($data, 'NextTransactionDate'),
+            lastTransactionDate: Data::dateTime($data, 'LastTransactionDateIso') ?? Data::dateTime($data, 'LastTransactionDate'),
+            nextTransactionDate: Data::dateTime($data, 'NextTransactionDateIso') ?? Data::dateTime($data, 'NextTransactionDate'),
             raw: $data,
         );
     }

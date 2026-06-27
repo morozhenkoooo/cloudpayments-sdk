@@ -55,7 +55,7 @@ final readonly class CardPaymentRequest implements ApiRequest
             'Description' => $this->description,
             'AccountId' => $this->accountId,
             'Email' => $this->email,
-            'Payer' => $this->payer?->toArray(),
+            'Payer' => Payload::json($this->payer?->toArray()),
             'JsonData' => Payload::json($this->jsonData),
             'SaveCard' => $this->saveCard,
             'CultureName' => $this->cultureName,

@@ -97,16 +97,20 @@ final class PaymentsApi extends AbstractApi
 
     /**
      * Find the latest transaction for a merchant InvoiceId, or null if none.
+     *
+     * Returns null only when no transaction matches (empty Model); a genuine API
+     * failure (bad parameters, etc.) is raised as an {@see ApiException} rather
+     * than masked as "not found".
      */
     public function findByInvoiceId(string $invoiceId): ?Transaction
     {
-        $envelope = $this->transport->send('/payments/find', ['InvoiceId' => $invoiceId]);
+        $model = $this->model($this->transport->send('/payments/find', ['InvoiceId' => $invoiceId]));
 
-        if (!$envelope->success || $envelope->model === []) {
+        if ($model === []) {
             return null;
         }
 
-        return Transaction::fromModel($envelope->model);
+        return Transaction::fromModel($model);
     }
 
     /**

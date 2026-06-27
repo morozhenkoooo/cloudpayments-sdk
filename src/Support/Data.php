@@ -70,7 +70,7 @@ final class Data
     {
         $value = $data[$key] ?? null;
 
-        if ($value === null) {
+        if ($value === null || $value === '') {
             return null;
         }
 

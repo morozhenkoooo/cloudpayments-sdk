@@ -11,6 +11,7 @@ use CloudPayments\Enum\TransactionStatus;
 use CloudPayments\Exception\ApiException;
 use CloudPayments\Request\Payment\CardPaymentRequest;
 use CloudPayments\Request\Payment\ConfirmRequest;
+use CloudPayments\Request\Payment\Payer;
 use CloudPayments\Request\Payment\RefundRequest;
 use CloudPayments\Response\Secure3DS;
 use CloudPayments\Response\Transaction;
@@ -78,6 +79,31 @@ final class PaymentsApiTest extends TestCase
         self::assertSame('crypto-packet', $params['CardCryptogramPacket']);
         self::assertSame('INV-1', $params['InvoiceId']);
         self::assertSame('ru-RU', $params['CultureName']);
+    }
+
+    public function testPayerIsJsonEncodedAndBooleansAreLiterals(): void
+    {
+        $this->http->queueModel(['TransactionId' => 1, 'Status' => 'Completed', 'StatusCode' => 3]);
+
+        $this->api->charge(new CardPaymentRequest(
+            amount: Amount::of('1000.00'),
+            ipAddress: '127.0.0.1',
+            cardCryptogramPacket: 'crypto-packet',
+            payer: new Payer(firstName: 'Ivan', lastName: 'Petrov', country: 'RU'),
+            saveCard: true,
+        ));
+
+        $params = $this->http->lastRequestParams();
+
+        // Booleans must be "true"/"false" literals, not 1/0, for the ASP.NET binder.
+        self::assertSame('true', $params['SaveCard']);
+
+        // Payer must be a JSON string, not http_build_query bracket params.
+        self::assertArrayNotHasKey('Payer[FirstName]', $params);
+        $payer = json_decode($params['Payer'], true);
+        self::assertIsArray($payer);
+        self::assertSame('Ivan', $payer['FirstName']);
+        self::assertSame('RU', $payer['Country']);
     }
 
     public function testChargeReturnsSecure3dsWhenChallenged(): void
@@ -175,9 +201,17 @@ final class PaymentsApiTest extends TestCase
 
     public function testFindByInvoiceIdReturnsNullWhenMissing(): void
     {
-        $this->http->queueModel([], success: false, message: 'not found');
+        $this->http->queueModel([], success: true);
 
         self::assertNull($this->api->findByInvoiceId('UNKNOWN'));
+    }
+
+    public function testFindByInvoiceIdThrowsOnApiError(): void
+    {
+        $this->http->queueModel([], success: false, message: 'InvoiceId is required');
+
+        $this->expectException(ApiException::class);
+        $this->api->findByInvoiceId('');
     }
 
     public function testListMapsRows(): void

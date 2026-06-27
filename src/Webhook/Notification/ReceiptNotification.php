@@ -29,6 +29,7 @@ final readonly class ReceiptNotification implements \CloudPayments\Contract\Noti
         public ?string $invoiceId,
         public ?string $accountId,
         public ?float $amount,
+        public ?int $transactionId,
         public array $raw,
     ) {
     }
@@ -52,6 +53,7 @@ final readonly class ReceiptNotification implements \CloudPayments\Contract\Noti
             invoiceId: Data::string($data, 'InvoiceId'),
             accountId: Data::string($data, 'AccountId'),
             amount: Data::float($data, 'Amount'),
+            transactionId: Data::int($data, 'TransactionId'),
             raw: $data,
         );
     }

@@ -43,6 +43,7 @@ final class AmountTest extends TestCase
         yield 'negative' => ['-10'];
         yield 'comma' => ['10,5'];
         yield 'empty' => [''];
+        yield 'too many decimals' => ['10.999'];
     }
 
     #[DataProvider('invalidProvider')]

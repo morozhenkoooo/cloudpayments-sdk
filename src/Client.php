@@ -11,7 +11,6 @@ use CloudPayments\Api\SubscriptionsApi;
 use CloudPayments\Http\RandomRequestIdGenerator;
 use CloudPayments\Http\RequestIdGenerator;
 use CloudPayments\Http\Transport;
-use CloudPayments\Webhook\SignatureValidator;
 use CloudPayments\Webhook\WebhookProcessor;
 use Http\Discovery\Psr17FactoryDiscovery;
 use Http\Discovery\Psr18ClientDiscovery;
@@ -87,7 +86,7 @@ final class Client
 
     public function webhooks(): WebhookProcessor
     {
-        return $this->webhooks ??= new WebhookProcessor(new SignatureValidator($this->config->apiSecret));
+        return $this->webhooks ??= new WebhookProcessor($this->config->createSignatureValidator());
     }
 
     /**

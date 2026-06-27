@@ -7,6 +7,7 @@ namespace CloudPayments\Request\Subscription;
 use CloudPayments\Contract\ApiRequest;
 use CloudPayments\Enum\Currency;
 use CloudPayments\Enum\Interval;
+use CloudPayments\Request\Receipt\CustomerReceipt;
 use CloudPayments\Support\Payload;
 use CloudPayments\ValueObject\Amount;
 
@@ -18,9 +19,6 @@ use CloudPayments\ValueObject\Amount;
  */
 final readonly class CreateSubscriptionRequest implements ApiRequest
 {
-    /**
-     * @param array<string, mixed>|null $customerReceipt online-checkout receipt data (54-FZ)
-     */
     public function __construct(
         public string $token,
         public string $accountId,
@@ -33,7 +31,8 @@ final readonly class CreateSubscriptionRequest implements ApiRequest
         public ?Currency $currency = Currency::RUB,
         public ?bool $requireConfirmation = null,
         public ?int $maxPeriods = null,
-        public ?array $customerReceipt = null,
+        /** Online-checkout receipt (54-FZ) registered with each recurring charge. */
+        public ?CustomerReceipt $customerReceipt = null,
     ) {
     }
 
@@ -54,7 +53,7 @@ final readonly class CreateSubscriptionRequest implements ApiRequest
             'Interval' => $this->interval->value,
             'Period' => $this->period,
             'MaxPeriods' => $this->maxPeriods,
-            'CustomerReceipt' => Payload::json($this->customerReceipt),
+            'CustomerReceipt' => Payload::json($this->customerReceipt?->toArray()),
         ];
     }
 }

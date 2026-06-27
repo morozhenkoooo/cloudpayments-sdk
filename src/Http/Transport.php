@@ -27,6 +27,12 @@ use Psr\Http\Message\StreamFactoryInterface;
  */
 final readonly class Transport
 {
+    /** Reject suspiciously large response bodies to avoid memory exhaustion. */
+    private const int MAX_RESPONSE_BYTES = 4 * 1024 * 1024;
+
+    /** Cap JSON nesting depth; CloudPayments responses are shallow. */
+    private const int MAX_JSON_DEPTH = 32;
+
     public function __construct(
         private Config $config,
         private ClientInterface $httpClient,
@@ -70,6 +76,14 @@ final readonly class Transport
         }
 
         $status = $response->getStatusCode();
+
+        $size = $response->getBody()->getSize();
+        if ($size !== null && $size > self::MAX_RESPONSE_BYTES) {
+            throw new UnexpectedResponseException(
+                \sprintf('CloudPayments response body is too large (%d bytes).', $size),
+            );
+        }
+
         $body = (string) $response->getBody();
 
         if ($status === 401) {
@@ -95,7 +109,28 @@ final readonly class Transport
             return json_encode($payload, JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE);
         }
 
-        return http_build_query($payload);
+        return http_build_query(self::stringifyBooleans($payload));
+    }
+
+    /**
+     * CloudPayments' form binder expects `true`/`false` literals, not the
+     * `1`/`0` that http_build_query would otherwise produce for booleans.
+     *
+     * @param array<array-key, mixed> $payload
+     *
+     * @return array<array-key, mixed>
+     */
+    private static function stringifyBooleans(array $payload): array
+    {
+        foreach ($payload as $key => $value) {
+            if (\is_bool($value)) {
+                $payload[$key] = $value ? 'true' : 'false';
+            } elseif (\is_array($value)) {
+                $payload[$key] = self::stringifyBooleans($value);
+            }
+        }
+
+        return $payload;
     }
 
     private function decode(string $body, int $status): Envelope
@@ -105,7 +140,7 @@ final readonly class Transport
         }
 
         try {
-            $decoded = json_decode($body, true, flags: JSON_THROW_ON_ERROR);
+            $decoded = json_decode($body, true, self::MAX_JSON_DEPTH, JSON_THROW_ON_ERROR);
         } catch (\JsonException $e) {
             throw new UnexpectedResponseException(
                 'CloudPayments returned a non-JSON response: ' . $e->getMessage(),

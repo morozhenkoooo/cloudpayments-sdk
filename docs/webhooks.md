@@ -315,6 +315,20 @@ final class CloudPaymentsWebhookController
 > mutates the request body — the signature is over the raw bytes. `getContent()`
 > returns those bytes untouched.
 
+## Security notes
+
+- **Replay protection.** A valid signature proves authenticity and integrity, but
+  not freshness — the same signed body replayed later still verifies. Make your
+  handlers idempotent: key side effects on `transactionId` (or `invoiceId`) and
+  ignore an event you have already processed.
+- **Don't log the raw payload.** Every notification exposes `$notification->raw`
+  (and `Card`, `email`, IP, token fields) with the full wire data. Avoid dumping
+  the whole object into persistent logs. `Config` already redacts the API secret
+  from `var_dump`/debug output via `__debugInfo()`.
+- **Verify before you act.** Always call `parse()` (which verifies) — never read
+  the body first and verify "later". The signature must be checked over the exact
+  raw bytes before any business logic runs.
+
 ## See also
 
 - [Payments](payments.md) — `Pay`/`Fail`/`Confirm` correspond to charge outcomes
