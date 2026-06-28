@@ -142,6 +142,24 @@ final class PaymentsApiTest extends TestCase
         self::assertSame(TransactionStatus::Declined, $result->status);
     }
 
+    public function testCheckNotificationRejectionMapsReasonCode(): void
+    {
+        // Real-world case: the merchant's Check webhook rejected the payment.
+        $this->http->queueModel([
+            'TransactionId' => 10,
+            'Status' => 'Declined',
+            'Reason' => 'CheckResponseInvalidAccountId',
+            'ReasonCode' => 3002,
+        ], success: false);
+
+        $result = $this->api->charge($this->chargeRequest());
+
+        self::assertInstanceOf(Transaction::class, $result);
+        self::assertTrue($result->isDeclined());
+        self::assertSame(ReasonCode::CheckResponseInvalidAccountId, $result->reasonCode);
+        self::assertSame(3002, $result->reasonCodeRaw);
+    }
+
     public function testApiErrorWithoutModelThrows(): void
     {
         $this->http->queueModel([], success: false, message: 'Amount is required');

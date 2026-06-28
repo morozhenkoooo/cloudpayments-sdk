@@ -173,6 +173,12 @@ the int) whenever a code is not enumerated here. `label()` returns the case name
 | `UnableToProcess` | `5097` | Unable to process. |
 | `AuthenticationFailed` | `5204` | 3-D Secure authentication failed. |
 | `AntiFraud` | `5206` | Blocked by anti-fraud rules. |
+| `CheckResponseInvalidAccountId` | `3002` | Rejected by the merchant's own Check notification — invalid/unknown `AccountId`. |
+
+> `5xxx` codes are acquirer declines. `3xxx` codes mean the payment was rejected by
+> the merchant's own Check/Pay notification (webhook), not by the bank. CloudPayments
+> doesn't publish the full `3xxx` list, so only codes confirmed against the live API are
+> enumerated; any other surfaces via `reasonCodeRaw`.
 
 ```php
 use CloudPayments\Enum\ReasonCode;

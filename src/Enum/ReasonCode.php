@@ -41,6 +41,14 @@ enum ReasonCode: int
     case AuthenticationFailed = 5204;
     case AntiFraud = 5206;
 
+    // 3xxx — the payment was rejected by the merchant's own Check/Pay
+    // notification (webhook), not by the acquirer. CloudPayments does not
+    // publish the full numeric list; only the codes confirmed against the live
+    // API are enumerated here — others surface via `reasonCodeRaw`.
+
+    /** The merchant Check notification rejected the payment: AccountId is invalid/unknown. */
+    case CheckResponseInvalidAccountId = 3002;
+
     public function label(): string
     {
         return $this->name;
